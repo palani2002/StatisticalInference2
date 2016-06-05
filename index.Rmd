@@ -1,0 +1,154 @@
+---
+title: "Basic inferential data analysis"
+author: "Palani"
+date: "Sunday, June 05, 2016"
+output: word_document
+---
+
+data(ToothGrowth)
+
+The first 5 rows are
+```{r eval=TRUE,echo=FALSE}
+head(ToothGrowth)
+```
+
+The dimension of the data is
+```{r echo=FALSE,eval=TRUE}
+dim(ToothGrowth)
+```
+
+#### Exploratory Analysis
+
+*Conditioning Plot*  
+This plot compares two factor variables with the one numeric variable .And the plot clearly explains that there is a difference in dosage levels and delivery method  with respect to length of teeth in each of 10 guinea pigs.
+
+```{r echo=TRUE,eval=TRUE}
+coplot(len ~ dose | supp, data = ToothGrowth, panel = panel.smooth,
+       xlab = "ToothGrowth data: length vs dose, given type of supplement")
+```
+
+Similar analysis using `Box` plot.
+
+```{r,echo=FALSE,eval=TRUE}
+library(ggplot2)
+ToothGrowth$Combination <- interaction(ToothGrowth$supp, ToothGrowth$dose)
+g<-ggplot(aes(y =len, x = Combination), data = ToothGrowth) + geom_boxplot()
+g+ggtitle("Interaction Box Plot")+theme(axis.text = element_text(colour = "blue"))+
+  theme(axis.text=element_text(size=12),axis.title=element_text(size=20,face="bold"))+
+  theme(plot.title = element_text(lineheight=.8, face="bold"))
+```
+
+
+
+**3-Way Frequency Table Analysis**
+
+This numerical analysis clearly shows there is a clear difference between two factors and numeric variable length of teeth.
+
+```{r echo=TRUE,eval=TRUE}
+mytable <- xtabs(ToothGrowth$len~ToothGrowth$supp+ToothGrowth$dose, data=ToothGrowth)
+ftable(mytable) # print table 
+```
+
+*Mean anlsysis by group*
+There is a clear difference in mean between delivery method and length of teeth as well as dosage levels and length of teeth.
+
+```{r echo=TRUE,eval=TRUE}
+tapply(ToothGrowth$len,list(ToothGrowth$supp,ToothGrowth$dose),mean)
+```
+
+#### Assumptions 
+**Considering the following assuptions are valid before conducting t.test**
+
+ + The t interval technically assumes that the data are iid normal  
+ + The second assumption made is that of a simple random sample, that the data is collected from a representative, randomly selected portion of the total population.
+ + The third assumption is that the data, when plotted, results in a normal distribution, bell-shaped distribution curve.
+ + The fourth assumption is that a reasonably large sample size is used. A larger sample size means that the distribution of results should approach a normal bell-shaped curve.
+ + The final assumption is homogeneity of variance. Homogeneous, or equal, variance exists when the standard deviations of samples are approximately equal.
+
+### Inferential Analysis  
+*Setting Hypothesis*  
+
+**H0=mu0=No Difference between `Delivery` methods.**  
+**Ha=mua=There is a difference betwwen `Delivery` methods.**  
+
+*Evaluating hypothesis through estimating `Confidence Intervals`*  
+*t,tests are used for constructing confidence interval*  
+
+Analysing variance between groups for setting variance parameter in t.test procedure.
+
+
+```{r echo=TRUE,eval=TRUE}
+tapply(ToothGrowth$len,list(ToothGrowth$supp,ToothGrowth$dose),var)
+```
+
+The table shows there is non constant variance across delivery methods and length of teeth.
+
+Evaluating hypothsis test through t.test
+
+```{r,echo=TRUE,eval=TRUE}
+t.test(len ~ supp, paired = FALSE, var.equal = FALSE, data = ToothGrowth)$conf
+```
+
+The confidence interval contains 0 hence there is no signifigant difference in delivery methods.
+
+Estimating `p` value
+
+```{r echo=TRUE,eval=TRUE}
+t.test(len ~ supp, paired = FALSE, var.equal = FALSE, data = ToothGrowth)$p.val
+```
+
+The p value is greater than alpha level 0.05 hence we fail to reject null hypothesis.
+
+### Inference Analysis 2
+
+**H0=mu0=No Difference between `Dosage` levels.**  
+**Ha=mua=There is a difference betwwen `Dosage` levels.**
+
+This time comparing dosage levels and length of teeth growth.
+
+Unequal variance T test comparing 3 dosage levels with length of teeh.  
+
+```{r echo=TRUE,eval=TRUE}
+wideCW14 <- subset(ToothGrowth, dose %in% c(0.5, 1))
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$conf
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$p.val
+```
+
+
+```{r echo=TRUE,eval=TRUE}
+wideCW14 <- subset(ToothGrowth, dose %in% c(0.5, 2))
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$conf
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$p.val
+```
+
+```{r echo=TRUE,eval=TRUE}
+wideCW14 <- subset(ToothGrowth, dose %in% c(1, 2))
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$conf
+t.test(len ~ dose, paired = FALSE, var.equal = FALSE, data = wideCW14)$p.val
+```
+
+
+**Interpretation**  
+The above all the three analysis shows there is a difference between all the dosage levels and length of teeth in pigs.
+The reason for confirming for the significant difference is the confidence interval does not contain zero and the p value is less than alpha.Hence we reject `null` hypothesis.  
+And the confidence interval describes the percentage of intervals that would cover the parameter being estimated if we were to repeat the experiment over and over.
+
+#### Conclusion  
+
+**In this inference analysis , followings inferences are  concluded ,**  
+
+  + There is no difference between delivery methods and length of teeth pig.  
+  + There is a significant difference between doasge levels and length of teeth pig.  
+ 
+ 
+ 
+
+
+
+
+
+
+
+
+
+
